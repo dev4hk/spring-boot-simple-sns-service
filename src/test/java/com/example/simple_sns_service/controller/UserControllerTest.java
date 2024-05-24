@@ -38,7 +38,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.join()).thenReturn(mock(User.class));
+        when(userService.join(userName, password)).thenReturn(mock(User.class));
 
         mockMvc.perform(
                         post("/api/v1/users/join")
@@ -54,7 +54,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.join()).thenThrow(new SnsApplicationException());
+        when(userService.join(userName, password)).thenThrow(new SnsApplicationException());
 
         mockMvc.perform(
                         post("/api/v1/users/join")

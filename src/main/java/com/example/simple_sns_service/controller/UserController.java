@@ -17,6 +17,6 @@ public class UserController {
     // TODO: implement
     @PostMapping
     public void join() {
-        userService.join();
+        userService.join("", "");
     }
 }
