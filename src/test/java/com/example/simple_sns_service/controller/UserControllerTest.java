@@ -86,7 +86,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.login()).thenThrow(new SnsApplicationException());
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
 
         mockMvc.perform(
                         post("/api/v1/users/login")
@@ -102,7 +102,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.login()).thenThrow(new SnsApplicationException());
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
 
         mockMvc.perform(
                         post("/api/v1/users/login")

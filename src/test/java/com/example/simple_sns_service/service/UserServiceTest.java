@@ -1,6 +1,7 @@
 package com.example.simple_sns_service.service;
 
 import com.example.simple_sns_service.exception.SnsApplicationException;
+import com.example.simple_sns_service.fixture.UserEntityFixture;
 import com.example.simple_sns_service.model.entity.UserEntity;
 import com.example.simple_sns_service.repository.UserEntityRepository;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +32,7 @@ public class UserServiceTest {
         String password = "password";
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
-        when(userEntityRepository.save(any())).thenReturn(Optional.of(mock(UserEntity.class)));
+        when(userEntityRepository.save(any())).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
 
         Assertions.assertDoesNotThrow(() -> userService.join(userName, password));
     }
@@ -41,9 +42,39 @@ public class UserServiceTest {
         String userName = "username";
         String password = "password";
 
-        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(mock(UserEntity.class)));
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
 
         Assertions.assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+    }
+
+    @Test
+    void login() {
+        String userName = "username";
+        String password = "password";
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
+        Assertions.assertDoesNotThrow(() -> userService.login(userName, password));
+    }
+
+    @Test
+    void login_with_non_existing_credential() {
+        String userName = "username";
+        String password = "password";
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
+    }
+
+    @Test
+    void login_with_wrong_password() {
+        String userName = "username";
+        String password = "password";
+        String wrongPassword = "wrongPassword";
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, wrongPassword)));
+
+        Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
     }
 
 }

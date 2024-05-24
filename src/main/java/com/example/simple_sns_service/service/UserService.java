@@ -1,5 +1,6 @@
 package com.example.simple_sns_service.service;
 
+import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.model.entity.UserEntity;
 import com.example.simple_sns_service.repository.UserEntityRepository;
@@ -22,7 +23,13 @@ public class UserService {
     }
 
     // TODO: implement
-    public String login() {
+    public String login(String userName, String password) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName)
+                .orElseThrow(() -> new SnsApplicationException());
+
+        if(!userEntity.getPassword().equals(password)) {
+            throw new SnsApplicationException();
+        }
         return "";
     }
 }
