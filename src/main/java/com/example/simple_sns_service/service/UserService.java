@@ -11,4 +11,8 @@ public class UserService {
         return new User();
     }
 
+    // TODO: implement
+    public String login() {
+        return "";
+    }
 }

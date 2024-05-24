@@ -1,10 +1,10 @@
 package com.example.simple_sns_service.controller;
 
 import com.example.simple_sns_service.controller.request.UserJoinRequest;
+import com.example.simple_sns_service.controller.request.UserLoginRequest;
 import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +63,53 @@ public class UserControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void login() throws Exception {
+        String userName = "username";
+        String password = "password";
+
+        when(userService.login()).thenReturn("test_token");
+
+        mockMvc.perform(
+                        post("/api/v1/users/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void login_with_non_existing_credential_returns_error() throws Exception {
+        String userName = "username";
+        String password = "password";
+
+        when(userService.login()).thenThrow(new SnsApplicationException());
+
+        mockMvc.perform(
+                        post("/api/v1/users/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void login_with_wrong_password_returns_error() throws Exception {
+        String userName = "username";
+        String password = "password";
+
+        when(userService.login()).thenThrow(new SnsApplicationException());
+
+        mockMvc.perform(
+                        post("/api/v1/users/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }
