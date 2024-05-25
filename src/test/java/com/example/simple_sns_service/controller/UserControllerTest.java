@@ -2,6 +2,7 @@ package com.example.simple_sns_service.controller;
 
 import com.example.simple_sns_service.controller.request.UserJoinRequest;
 import com.example.simple_sns_service.controller.request.UserLoginRequest;
+import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.service.UserService;
@@ -54,7 +55,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.join(userName, password)).thenThrow(new SnsApplicationException());
+        when(userService.join(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
 
         mockMvc.perform(
                         post("/api/v1/users/join")
@@ -70,7 +71,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.login()).thenReturn("test_token");
+        when(userService.login(userName, password)).thenReturn("test_token");
 
         mockMvc.perform(
                         post("/api/v1/users/login")
@@ -86,7 +87,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
+        when(userService.login(userName, password)).thenThrow( new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
 
         mockMvc.perform(
                         post("/api/v1/users/login")
@@ -102,7 +103,7 @@ public class UserControllerTest {
         String userName = "username";
         String password = "password";
 
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
+        when(userService.login(userName, password)).thenThrow( new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
 
         mockMvc.perform(
                         post("/api/v1/users/login")
