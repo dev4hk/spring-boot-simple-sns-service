@@ -42,7 +42,7 @@ public class PostController {
         return Response.success(postService.getAllPosts(pageable).map(PostResponse::fromPost));
     }
 
-    @GetMapping("/mine")
+    @GetMapping("/my")
     public Response<Page<PostResponse>> getMyPosts(Pageable pageable, Authentication authentication) {
         return Response.success(postService.getMyPosts(pageable, authentication.getName()).map(PostResponse::fromPost));
     }
