@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -183,6 +184,55 @@ public class PostControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+
+    @WithMockUser
+    @Test
+    void get_posts() throws Exception {
+        when(postService.getAllPosts(any())).thenReturn(Page.empty());
+        mockMvc.perform(
+                        get("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void get_posts_without_login_returns_error() throws Exception {
+        when(postService.getAllPosts(any())).thenReturn(Page.empty());
+        mockMvc.perform(
+                        get("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void get_my_posts() throws Exception {
+        when(postService.getMyPosts(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(
+                        get("/api/v1/posts/mine")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void get_my_posts_without_login_returns_error() throws Exception {
+        when(postService.getMyPosts(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(
+                        get("/api/v1/posts/mine")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
 }
