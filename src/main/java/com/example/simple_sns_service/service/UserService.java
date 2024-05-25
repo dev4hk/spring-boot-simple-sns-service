@@ -5,7 +5,9 @@ import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.model.entity.UserEntity;
 import com.example.simple_sns_service.repository.UserEntityRepository;
+import com.example.simple_sns_service.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,12 @@ public class UserService {
 
     private final UserEntityRepository userEntityRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${jwt.token.expired-time-ms}")
+    private Long expiredTimeMs;
 
     @Transactional
     public User join(String userName, String password) {
@@ -34,9 +42,10 @@ public class UserService {
         UserEntity userEntity = userEntityRepository.findByUserName(userName)
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s not found", userName)));
 
-        if (passwordEncoder.matches(password, userEntity.getPassword())) {
+        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
-        return "";
+
+        return JwtTokenUtils.generateToken(userName, this.secretKey, this.expiredTimeMs);
     }
 }
