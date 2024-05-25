@@ -1,5 +1,6 @@
 package com.example.simple_sns_service.service;
 
+import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.fixture.UserEntityFixture;
 import com.example.simple_sns_service.model.entity.UserEntity;
@@ -37,7 +38,7 @@ public class UserServiceTest {
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(password)).thenReturn("encryptedPassword");
-        when(userEntityRepository.save(any())).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
+        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName, password));
 
         Assertions.assertDoesNotThrow(() -> userService.join(userName, password));
     }
@@ -49,7 +50,9 @@ public class UserServiceTest {
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
         when(passwordEncoder.encode(password)).thenReturn("encryptedPassword");
-        Assertions.assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
+        Assertions.assertEquals(ErrorCode.DUPLICATED_USER_NAME, exception.getErrorCode());
     }
 
     @Test
@@ -57,7 +60,11 @@ public class UserServiceTest {
         String userName = "username";
         String password = "password";
 
-        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
+        UserEntity fixture = UserEntityFixture.get(userName, password);
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
+        when(passwordEncoder.matches(password, fixture.getPassword())).thenReturn(true);
+
         Assertions.assertDoesNotThrow(() -> userService.login(userName, password));
     }
 
@@ -68,7 +75,8 @@ public class UserServiceTest {
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
+        Assertions.assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -79,7 +87,8 @@ public class UserServiceTest {
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, wrongPassword)));
 
-        Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> userService.login(userName, password));
+        Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
     }
 
 }
