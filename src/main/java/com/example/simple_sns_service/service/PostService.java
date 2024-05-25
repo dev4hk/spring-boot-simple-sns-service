@@ -2,6 +2,7 @@ package com.example.simple_sns_service.service;
 
 import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
+import com.example.simple_sns_service.model.Post;
 import com.example.simple_sns_service.model.entity.PostEntity;
 import com.example.simple_sns_service.model.entity.UserEntity;
 import com.example.simple_sns_service.repository.PostEntityRepository;
@@ -18,7 +19,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
 
     @Transactional
-    public void create(String title, String body, String userName){
+    public void create(String title, String body, String userName) {
         UserEntity userEntity = userEntityRepository.findByUserName(userName)
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
 
@@ -26,9 +27,21 @@ public class PostService {
     }
 
     @Transactional
-    public void modify(String title, String body, String userName, Integer postId) {
+    public Post modify(String title, String body, String userName, Integer postId) {
         UserEntity userEntity = userEntityRepository.findByUserName(userName)
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+
+        PostEntity postEntity = postEntityRepository.findById(postId)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not found", postId)));
+
+        if (postEntity.getUser() != userEntity) {
+            throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
+        }
+
+        postEntity.setTitle(title);
+        postEntity.setBody(body);
+
+        return Post.fromEntity(postEntityRepository.saveAndFlush(postEntity));
 
     }
 
