@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.swing.text.html.Option;
 import java.util.Optional;
@@ -26,12 +27,16 @@ public class UserServiceTest {
     @MockBean
     private UserEntityRepository userEntityRepository;
 
+    @MockBean
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void signup() {
         String userName = "username";
         String password = "password";
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(password)).thenReturn("encryptedPassword");
         when(userEntityRepository.save(any())).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
 
         Assertions.assertDoesNotThrow(() -> userService.join(userName, password));
@@ -43,7 +48,7 @@ public class UserServiceTest {
         String password = "password";
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
-
+        when(passwordEncoder.encode(password)).thenReturn("encryptedPassword");
         Assertions.assertThrows(SnsApplicationException.class, () -> userService.join(userName, password));
     }
 
