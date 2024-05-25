@@ -169,7 +169,9 @@ public class PostServiceTest {
     void get_my_posts() {
 
         Pageable pageable = mock(Pageable.class);
+        UserEntity user = mock(UserEntity.class);
 
+        when(userEntityRepository.findByUserName(any())).thenReturn(Optional.of(user));
         when(postEntityRepository.findAllByUser(any(), pageable)).thenReturn(Page.empty());
 
         Assertions.assertDoesNotThrow(() -> postService.getMyPosts(pageable, ""));
