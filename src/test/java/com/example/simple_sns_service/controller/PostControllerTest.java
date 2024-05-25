@@ -1,7 +1,10 @@
 package com.example.simple_sns_service.controller;
 
 import com.example.simple_sns_service.controller.request.PostCreateRequest;
+import com.example.simple_sns_service.controller.request.PostModifyRequest;
 import com.example.simple_sns_service.controller.request.UserJoinRequest;
+import com.example.simple_sns_service.exception.ErrorCode;
+import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,11 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,7 +55,7 @@ public class PostControllerTest {
 
     @WithAnonymousUser
     @Test
-    void create_post_without_login() throws Exception {
+    void create_post_without_login_returns_error() throws Exception {
         String title = "title";
         String body = "body";
 
@@ -59,5 +66,69 @@ public class PostControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void update_post() throws Exception {
+        String title = "title";
+        String body = "body";
+
+        mockMvc.perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void update_post_without_login_returns_error() throws Exception {
+        String title = "title";
+        String body = "body";
+
+        mockMvc.perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void update_post_by_another_user_returns_error() throws Exception {
+        String title = "title";
+        String body = "body";
+
+        doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).modify(eq(title), eq(body), any(), eq(1));
+
+        mockMvc.perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void update_non_existing_post_returns_error() throws Exception {
+        String title = "title";
+        String body = "body";
+
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).modify(eq(title), eq(body), any(), eq(1));
+
+        mockMvc.perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
