@@ -32,10 +32,10 @@ public class UserService {
     // TODO: implement
     public String login(String userName, String password) {
         UserEntity userEntity = userEntityRepository.findByUserName(userName)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s not found", userName)));
 
-        if (!userEntity.getPassword().equals(password)) {
-            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, "");
+        if (passwordEncoder.matches(password, userEntity.getPassword())) {
+            throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
         return "";
     }
