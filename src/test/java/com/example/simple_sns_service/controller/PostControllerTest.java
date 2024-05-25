@@ -216,7 +216,7 @@ public class PostControllerTest {
     void get_my_posts() throws Exception {
         when(postService.getMyPosts(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(
-                        get("/api/v1/posts/mine")
+                        get("/api/v1/posts/my")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -228,7 +228,7 @@ public class PostControllerTest {
     void get_my_posts_without_login_returns_error() throws Exception {
         when(postService.getMyPosts(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(
-                        get("/api/v1/posts/mine")
+                        get("/api/v1/posts/my")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
