@@ -108,4 +108,48 @@ public class PostServiceTest {
         Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
     }
 
+    @Test
+    void delete_post() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        Assertions.assertDoesNotThrow(() -> postService.delete(userName, postId));
+    }
+
+    @Test
+    void delete_non_existing_post_returns_error() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void delete_post_by_another_user_returns_error() {
+        String userName = "userName";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
+        UserEntity writer = UserEntityFixture.get("userName1", "password1", 2);
+
+        when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
+        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
+    }
+
 }

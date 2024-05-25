@@ -23,8 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -133,6 +132,54 @@ public class PostControllerTest {
                         put("/api/v1/posts/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @WithMockUser
+    @Test
+    void delete_post() throws Exception {
+        mockMvc.perform(
+                        delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void delete_post_without_login_returns_error() throws Exception {
+        mockMvc.perform(
+                        delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void delete_post_by_another_user_returns_error() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(any(), any());
+
+        mockMvc.perform(
+                        delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void delete_non_existing_post_returns_error() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(), any());
+
+        mockMvc.perform(
+                        delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
                 .andExpect(status().isNotFound());
