@@ -1,5 +1,6 @@
 package com.example.simple_sns_service.controller;
 
+import com.example.simple_sns_service.controller.request.PostCommentRequest;
 import com.example.simple_sns_service.controller.request.PostCreateRequest;
 import com.example.simple_sns_service.controller.request.PostModifyRequest;
 import com.example.simple_sns_service.controller.request.UserJoinRequest;
@@ -264,6 +265,43 @@ public class PostControllerTest {
         mockMvc.perform(
                         post("/api/v1/posts/1/likes")
                                 .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @WithMockUser
+    @Test
+    void create_comment() throws Exception {
+        mockMvc.perform(
+                        post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void create_comment_without_login_returns_error() throws Exception {
+        mockMvc.perform(
+                        post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void create_comment_on_non_existing_post_returns_error() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any());
+        mockMvc.perform(
+                        post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
                 )
                 .andDo(print())
                 .andExpect(status().isNotFound());
