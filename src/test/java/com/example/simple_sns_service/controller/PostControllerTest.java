@@ -235,4 +235,38 @@ public class PostControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @WithMockUser
+    @Test
+    void like_post() throws Exception {
+        mockMvc.perform(
+                        post("/api/v1/posts/1/like")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithAnonymousUser
+    @Test
+    void like_post_without_login_returns_error() throws Exception {
+        mockMvc.perform(
+                        post("/api/v1/posts/like")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @WithMockUser
+    @Test
+    void like_non_existing_post_returns_error() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
+        mockMvc.perform(
+                        post("/api/v1/posts/like")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
 }
