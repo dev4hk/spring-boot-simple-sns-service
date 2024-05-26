@@ -3,7 +3,6 @@ package com.example.simple_sns_service.controller;
 import com.example.simple_sns_service.controller.request.PostCommentRequest;
 import com.example.simple_sns_service.controller.request.PostCreateRequest;
 import com.example.simple_sns_service.controller.request.PostModifyRequest;
-import com.example.simple_sns_service.controller.request.UserJoinRequest;
 import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.fixture.PostEntityFixture;
@@ -297,7 +296,7 @@ public class PostControllerTest {
     @WithMockUser
     @Test
     void create_comment_on_non_existing_post_returns_error() throws Exception {
-        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any());
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any(), any());
         mockMvc.perform(
                         post("/api/v1/posts/1/comments")
                                 .contentType(MediaType.APPLICATION_JSON)

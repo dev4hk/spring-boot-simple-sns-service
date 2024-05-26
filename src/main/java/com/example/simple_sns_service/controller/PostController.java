@@ -1,9 +1,12 @@
 package com.example.simple_sns_service.controller;
 
+import com.example.simple_sns_service.controller.request.PostCommentRequest;
 import com.example.simple_sns_service.controller.request.PostCreateRequest;
 import com.example.simple_sns_service.controller.request.PostModifyRequest;
+import com.example.simple_sns_service.controller.response.CommentResponse;
 import com.example.simple_sns_service.controller.response.PostResponse;
 import com.example.simple_sns_service.controller.response.Response;
+import com.example.simple_sns_service.model.Comment;
 import com.example.simple_sns_service.model.Post;
 import com.example.simple_sns_service.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +59,17 @@ public class PostController {
     @GetMapping("/{postId}/likes")
     public Response<Integer> likeCount(@PathVariable Integer postId, Authentication authentication) {
         return Response.success(postService.likeCount(postId));
+    }
+
+    @PostMapping("/{postId}/comments")
+    public Response<Void> comment(@PathVariable Integer postId, Authentication authentication, @RequestBody PostCommentRequest request) {
+        postService.comment(postId, authentication.getName(), request.getComment());
+        return Response.success();
+    }
+
+    @GetMapping("/{postId}/comments")
+    public Response<Page<CommentResponse>> getComments(@PathVariable Integer postId, Pageable pageable) {
+        return Response.success(postService.getComments(postId, pageable).map(CommentResponse::fromComment));
     }
 
 }
