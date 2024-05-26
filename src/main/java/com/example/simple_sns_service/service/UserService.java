@@ -2,8 +2,10 @@ package com.example.simple_sns_service.service;
 
 import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
+import com.example.simple_sns_service.model.Notification;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.model.entity.UserEntity;
+import com.example.simple_sns_service.repository.NotificationEntityRepository;
 import com.example.simple_sns_service.repository.UserEntityRepository;
 import com.example.simple_sns_service.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final NotificationEntityRepository notificationEntityRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret-key}")
@@ -56,7 +59,10 @@ public class UserService {
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
     }
 
-    public Page<Void> notificationList(String userName, Pageable page) {
-        return Page.empty();
+    public Page<Notification> notificationList(String userName, Pageable pageable) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+
+        return notificationEntityRepository.findAllByUser(userEntity, pageable).map(Notification::fromEntity);
     }
 }

@@ -2,16 +2,9 @@ package com.example.simple_sns_service.service;
 
 import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
-import com.example.simple_sns_service.model.Comment;
-import com.example.simple_sns_service.model.Post;
-import com.example.simple_sns_service.model.entity.CommentEntity;
-import com.example.simple_sns_service.model.entity.LikeEntity;
-import com.example.simple_sns_service.model.entity.PostEntity;
-import com.example.simple_sns_service.model.entity.UserEntity;
-import com.example.simple_sns_service.repository.CommentEntityRepository;
-import com.example.simple_sns_service.repository.LikeEntityRepository;
-import com.example.simple_sns_service.repository.PostEntityRepository;
-import com.example.simple_sns_service.repository.UserEntityRepository;
+import com.example.simple_sns_service.model.*;
+import com.example.simple_sns_service.model.entity.*;
+import com.example.simple_sns_service.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +19,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final NotificationEntityRepository notificationEntityRepository;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -80,6 +74,7 @@ public class PostService {
         });
 
         likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
+        notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_LIKE_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
     }
 
     public int likeCount(Integer postId) {
@@ -93,7 +88,12 @@ public class PostService {
         UserEntity userEntity = getUser(userName);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
+        notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_COMMENT_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
+    }
 
+    public Page<Comment> getComments(Integer postId, Pageable pageable) {
+        PostEntity postEntity = getPost(postId);
+        return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
     }
 
     private UserEntity getUser(String userName) {
@@ -106,8 +106,5 @@ public class PostService {
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not found", postId)));
     }
 
-    public Page<Comment> getComments(Integer postId, Pageable pageable) {
-        PostEntity postEntity = getPost(postId);
-        return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
-    }
+
 }
