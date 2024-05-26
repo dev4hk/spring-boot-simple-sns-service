@@ -3,8 +3,10 @@ package com.example.simple_sns_service.service;
 import com.example.simple_sns_service.exception.ErrorCode;
 import com.example.simple_sns_service.exception.SnsApplicationException;
 import com.example.simple_sns_service.model.Post;
+import com.example.simple_sns_service.model.entity.LikeEntity;
 import com.example.simple_sns_service.model.entity.PostEntity;
 import com.example.simple_sns_service.model.entity.UserEntity;
+import com.example.simple_sns_service.repository.LikeEntityRepository;
 import com.example.simple_sns_service.repository.PostEntityRepository;
 import com.example.simple_sns_service.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class PostService {
 
     private final PostEntityRepository postEntityRepository;
     private final UserEntityRepository userEntityRepository;
+    private final LikeEntityRepository likeEntityRepository;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -74,7 +77,16 @@ public class PostService {
 
     @Transactional
     public void like(Integer postId, String userName) {
+        PostEntity postEntity = postEntityRepository.findById(postId)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not found", postId)));
+        UserEntity userEntity = userEntityRepository.findByUserName(userName)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
 
+        likeEntityRepository.findByUserAndPost(userEntity, postEntity).ifPresent(like -> {
+            throw new SnsApplicationException(ErrorCode.ALREADY_LIKED, String.format("userName %s already like pose %d", userName, postId));
+        });
+
+        likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
     }
 
 }

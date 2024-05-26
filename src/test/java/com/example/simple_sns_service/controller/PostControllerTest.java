@@ -250,7 +250,7 @@ public class PostControllerTest {
     @Test
     void like_post_without_login_returns_error() throws Exception {
         mockMvc.perform(
-                        post("/api/v1/posts/like")
+                        post("/api/v1/posts/1/like")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -262,11 +262,11 @@ public class PostControllerTest {
     void like_non_existing_post_returns_error() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
         mockMvc.perform(
-                        post("/api/v1/posts/like")
+                        post("/api/v1/posts/1/like")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNotFound());
     }
 
 }
