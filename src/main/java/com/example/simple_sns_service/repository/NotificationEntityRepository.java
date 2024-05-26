@@ -7,5 +7,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationEntityRepository extends JpaRepository<NotificationEntity, Integer> {
-    Page<NotificationEntity> findAllByUser(UserEntity user, Pageable pageable);
+    Page<NotificationEntity> findAllByUserId(Integer userId, Pageable pageable);
 }
