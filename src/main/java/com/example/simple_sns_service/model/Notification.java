@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class Notification {
 
     private Integer id;
-    private User user;
+//    private User user;
     private NotificationType notificationType;
     private NotificationArgument notificationArgument;
     private Timestamp registeredAt;
@@ -23,7 +23,7 @@ public class Notification {
     public static Notification fromEntity(NotificationEntity entity) {
         return new Notification(
                 entity.getId(),
-                User.fromEntity(entity.getUser()),
+//                User.fromEntity(entity.getUser()),
                 entity.getNotificationType(),
                 entity.getArgs(),
                 entity.getRegisteredAt(),
