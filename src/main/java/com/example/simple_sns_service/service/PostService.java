@@ -77,7 +77,7 @@ public class PostService {
         notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_LIKE_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
     }
 
-    public int likeCount(Integer postId) {
+    public long likeCount(Integer postId) {
         PostEntity postEntity = getPost(postId);
         return likeEntityRepository.countByPost(postEntity);
     }
