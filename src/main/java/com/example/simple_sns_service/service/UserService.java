@@ -8,6 +8,8 @@ import com.example.simple_sns_service.repository.UserEntityRepository;
 import com.example.simple_sns_service.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,5 +54,9 @@ public class UserService {
     public User loadUserByUserName(String userName) {
         return userEntityRepository.findByUserName(userName).map(User::fromEntity)
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+    }
+
+    public Page<Void> notificationList(String userName, Pageable page) {
+        return Page.empty();
     }
 }
