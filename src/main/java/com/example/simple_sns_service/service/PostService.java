@@ -20,6 +20,8 @@ public class PostService {
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
     private final NotificationEntityRepository notificationEntityRepository;
+    private final NotificationService notificationService;
+
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -77,7 +79,8 @@ public class PostService {
         });
 
         likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
-        notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_LIKE_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
+        NotificationEntity notificationEntity = notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_LIKE_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
+        notificationService.send(notificationEntity.getId(), userEntity.getId());
     }
 
     public long likeCount(Integer postId) {
@@ -91,7 +94,9 @@ public class PostService {
         UserEntity userEntity = getUser(userName);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
-        notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_COMMENT_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
+        NotificationEntity notificationEntity = notificationEntityRepository.save(NotificationEntity.of(postEntity.getUser(), NotificationType.NEW_COMMENT_ON_POST, new NotificationArgument(userEntity.getId(), postEntity.getId())));
+        notificationService.send(notificationEntity.getId(), userEntity.getId());
+
     }
 
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
