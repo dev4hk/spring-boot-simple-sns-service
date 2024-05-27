@@ -6,6 +6,7 @@ import com.example.simple_sns_service.model.Notification;
 import com.example.simple_sns_service.model.User;
 import com.example.simple_sns_service.model.entity.UserEntity;
 import com.example.simple_sns_service.repository.NotificationEntityRepository;
+import com.example.simple_sns_service.repository.UserCacheRepository;
 import com.example.simple_sns_service.repository.UserEntityRepository;
 import com.example.simple_sns_service.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class UserService {
     private final UserEntityRepository userEntityRepository;
     private final NotificationEntityRepository notificationEntityRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserCacheRepository userCacheRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -42,12 +44,11 @@ public class UserService {
         return User.fromEntity(userEntity);
     }
 
-    // TODO: implement
     public String login(String userName, String password) {
-        UserEntity userEntity = userEntityRepository.findByUserName(userName)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+        User user = loadUserByUserName(userName);
+        userCacheRepository.setUser(user);
 
-        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
@@ -55,8 +56,10 @@ public class UserService {
     }
 
     public User loadUserByUserName(String userName) {
-        return userEntityRepository.findByUserName(userName).map(User::fromEntity)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName)));
+        return userCacheRepository.getUser(userName).orElseGet(
+                () -> userEntityRepository.findByUserName(userName).map(User::fromEntity)
+                .orElseThrow(
+                        () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not found", userName))));
     }
 
     public Page<Notification> notificationList(Integer userId, Pageable pageable) {

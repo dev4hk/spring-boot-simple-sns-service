@@ -16,3 +16,8 @@ jwt:
   secret-key: ${TEST_JWT_SECRET_KEY}
   token:
     expired-time-ms: ${TEST_JWT_EXPIRED_TIME}
+
+redis:
+  test:
+    host: ${TEST_REDIS_HOST}
+    port: ${TEST_REDIS_PORT}
