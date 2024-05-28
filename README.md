@@ -5,7 +5,7 @@ This project is for users to create / view posts
 ## Features
 
 - User can create posts and comments
-- User can hit a like button on posts
+- User can like posts
 - User can get notifications if someone else likes the user's posts
 - The service is integrated with Spring Security, that uses can use JWT tokens to access the service
 - The service is integrated with Redis, for caching in memory to reduce the number of DB accesses 
