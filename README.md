@@ -12,15 +12,17 @@ This project is for users to create / view posts
 
 ## Tech Stack
 
-- Spring Boot
-- Gradle
-- Spring Data JPA
-- Lombok
-- MySQL
-- Spring Security
-- JWT
-- Redis
-- JUnit
+![Static Badge](https://img.shields.io/badge/SpringBoot-blue)
+![Static Badge](https://img.shields.io/badge/SpringWeb-blue)
+![Static Badge](https://img.shields.io/badge/SpringSecurity-blue)
+![Static Badge](https://img.shields.io/badge/Gradle-blue)
+![Static Badge](https://img.shields.io/badge/JWT-blue)
+![Static Badge](https://img.shields.io/badge/SpringDataJPA-blue)
+![Static Badge](https://img.shields.io/badge/MySQL-blue)
+![Static Badge](https://img.shields.io/badge/JUnit-blue)
+![Static Badge](https://img.shields.io/badge/Mockito-blue)
+![Static Badge](https://img.shields.io/badge/Redis-blue)
+![Static Badge](https://img.shields.io/badge/SSE-blue)
 
 ## Entity Relationship Diagram
 ![ERD](images/ERD.png)
